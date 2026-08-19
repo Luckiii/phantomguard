@@ -77,13 +77,12 @@ repos:
     explain: "false"
 ```
 
-Both wrap the same CLI (`pip install phantomguard` under the hood), so
-behavior is identical to running `phantomguard scan` locally. Neither
-requires any API key — see "Scope" below.
-
-> Not yet published to PyPI, so `pip install phantomguard` in the action
-> doesn't resolve yet — both integrations are wired and testable in principle,
-> but won't work end-to-end for outside users until a release is published.
+Both wrap the same CLI (`pip install phantomguard-cli` under the hood — the
+PyPI *distribution name* is `phantomguard-cli` since plain `phantomguard`
+collided with PyPI's name-similarity check against an existing project; the
+installed command is still `phantomguard`), so behavior is identical to
+running `phantomguard scan` locally. Neither requires any API key — see
+"Scope" below.
 
 ## Risk scoring (M1)
 

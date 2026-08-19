@@ -25,7 +25,7 @@ runs:
 
     - name: Install PhantomGuard
       shell: bash
-      run: pip install phantomguard
+      run: pip install phantomguard-cli
 
     - name: Run PhantomGuard scan
       shell: bash

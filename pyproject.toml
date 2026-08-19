@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "phantomguard"
+name = "phantomguard-cli"
 version = "0.1.0"
 description = "Catches AI-hallucinated (slopsquatted) package names before install."
 requires-python = ">=3.11"
