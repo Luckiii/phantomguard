@@ -1,0 +1,7 @@
+- id: phantomguard
+  name: PhantomGuard
+  description: Catch AI-hallucinated (slopsquatted) package names before they get installed.
+  entry: phantomguard scan
+  language: python
+  files: \.(py|js|jsx|mjs|cjs|ts|tsx)$
+  require_serial: true

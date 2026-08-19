@@ -1,0 +1,37 @@
+name: "PhantomGuard"
+description: "Catch AI-hallucinated (slopsquatted) package names before they get installed."
+author: "PhantomGuard"
+branding:
+  icon: "shield"
+  color: "purple"
+
+inputs:
+  path:
+    description: "File or directory to scan"
+    required: false
+    default: "."
+  explain:
+    description: "Show which risk signals fired for each import"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install PhantomGuard
+      shell: bash
+      run: pip install phantomguard
+
+    - name: Run PhantomGuard scan
+      shell: bash
+      run: |
+        if [ "${{ inputs.explain }}" = "true" ]; then
+          phantomguard scan "${{ inputs.path }}" --explain
+        else
+          phantomguard scan "${{ inputs.path }}"
+        fi

@@ -1,0 +1,10 @@
+docs/
+CLAUDE.md
+
+__pycache__/
+*.egg-info/
+.pytest_cache/
+*.pyc
+.venv/
+build/
+dist/
