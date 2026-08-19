@@ -142,3 +142,57 @@ def ensure_seeded(conn: sqlite3.Connection) -> None:
     count = conn.execute("SELECT COUNT(*) FROM hallucinated_names").fetchone()[0]
     if count == 0:
         seed(conn)
+
+
+def record_observation(
+    conn: sqlite3.Connection,
+    name: str,
+    *,
+    ecosystem: str,
+    model: str,
+    observed_at: str,
+    currently_registered: bool = False,
+) -> None:
+    """Log a single fuzz-run sighting of a nonexistent package name, upserting into
+    hallucinated_names: new names are inserted, existing ones have times_observed
+    incremented, observed_by_models deduped-and-extended, and last_observed_at bumped."""
+    existing = find(conn, name, ecosystem=ecosystem)
+    if existing is None:
+        seed(
+            conn,
+            entries=[
+                HallucinatedName(
+                    name=name,
+                    ecosystem=ecosystem,
+                    first_observed_at=observed_at,
+                    last_observed_at=observed_at,
+                    times_observed=1,
+                    observed_by_models=[model],
+                    currently_registered=currently_registered,
+                )
+            ],
+        )
+        return
+
+    models = list(existing.observed_by_models)
+    if model not in models:
+        models.append(model)
+
+    conn.execute(
+        """
+        UPDATE hallucinated_names
+        SET times_observed = times_observed + 1,
+            observed_by_models = ?,
+            last_observed_at = ?,
+            currently_registered = ?
+        WHERE name = ? AND ecosystem = ?
+        """,
+        (
+            json.dumps(models),
+            observed_at,
+            int(currently_registered),
+            name,
+            ecosystem,
+        ),
+    )
+    conn.commit()

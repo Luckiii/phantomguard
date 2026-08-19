@@ -3,6 +3,7 @@ import sqlite3
 from phantomguard.db.known_hallucinations import (
     SEED_HALLUCINATED_NAMES,
     find,
+    record_observation,
     seed,
 )
 from phantomguard.db.models import connect
@@ -53,3 +54,34 @@ def test_find_is_ecosystem_scoped():
     npm_only = [e for e in SEED_HALLUCINATED_NAMES if e.ecosystem == "npm"]
     if npm_only:
         assert find(conn, npm_only[0].name, ecosystem="pypi") is None
+
+
+def test_record_observation_inserts_new_name():
+    conn = connect(":memory:")
+    record_observation(conn, "totally-fake-pkg", ecosystem="pypi", model="claude-fable-5", observed_at="2026-08-20")
+    found = find(conn, "totally-fake-pkg", ecosystem="pypi")
+    assert found is not None
+    assert found.times_observed == 1
+    assert found.observed_by_models == ["claude-fable-5"]
+    assert found.first_observed_at == "2026-08-20"
+    assert found.last_observed_at == "2026-08-20"
+
+
+def test_record_observation_increments_existing_name():
+    conn = connect(":memory:")
+    record_observation(conn, "totally-fake-pkg", ecosystem="pypi", model="claude-fable-5", observed_at="2026-08-20")
+    record_observation(conn, "totally-fake-pkg", ecosystem="pypi", model="claude-fable-5", observed_at="2026-08-21")
+    found = find(conn, "totally-fake-pkg", ecosystem="pypi")
+    assert found.times_observed == 2
+    assert found.last_observed_at == "2026-08-21"
+    assert found.first_observed_at == "2026-08-20"
+
+
+def test_record_observation_dedupes_model_list_but_tracks_new_models():
+    conn = connect(":memory:")
+    record_observation(conn, "totally-fake-pkg", ecosystem="pypi", model="claude-fable-5", observed_at="2026-08-20")
+    record_observation(conn, "totally-fake-pkg", ecosystem="pypi", model="claude-fable-5", observed_at="2026-08-21")
+    record_observation(conn, "totally-fake-pkg", ecosystem="pypi", model="gpt-5", observed_at="2026-08-22")
+    found = find(conn, "totally-fake-pkg", ecosystem="pypi")
+    assert sorted(found.observed_by_models) == ["claude-fable-5", "gpt-5"]
+    assert found.times_observed == 3

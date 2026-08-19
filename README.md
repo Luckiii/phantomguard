@@ -2,10 +2,14 @@
 
 Catches AI-hallucinated ("slopsquatted") package names before they get installed.
 
-**Status: M2 — Multi-ecosystem + integrations.** `phantomguard scan <path> [<path> ...]`
+**Status: M4/M5 — Self-fuzz pipeline + MCP server.** `phantomguard scan <path> [<path> ...]`
 extracts Python and JS/TS imports, checks each against the PyPI or npm
 registry (as appropriate) and a local known-hallucination database, scores
-the result, and prints `ALLOW` / `WARN` / `BLOCK` with a reason.
+the result, and prints `ALLOW` / `WARN` / `BLOCK` with a reason. The
+known-hallucination database can now be grown over time by a maintainer-run
+fuzz pipeline, and the same checks are exposed as an MCP tool for
+MCP-compatible agents (Cursor, Windsurf, etc.). M3 (LLM necessity-rationale
+layer) was deliberately skipped — see "Scope" below.
 
 ## Install
 
@@ -15,6 +19,15 @@ uv pip install -e ".[dev]" -p .venv
 ```
 
 (or `pip install -e ".[dev]"` in any virtualenv)
+
+The core CLI/hook/pre-commit/GitHub-Action path only needs `typer`, `httpx`,
+and `pydantic` — no API key, ever. Two extras add optional, maintainer-only
+capability:
+
+- `.[fuzz]` — installs the `anthropic` SDK, needed only to run the self-fuzz
+  pipeline (see below).
+- `.[mcp]` — installs the `mcp` SDK, needed only to run the MCP server (see
+  below).
 
 ## Usage
 
@@ -100,6 +113,44 @@ from the public incidents named in the proposal doc; two of those
 (`unused-imports`, `huggingface-cli`) have inferred rather than independently
 verified metadata — see the `notes` field on each entry.
 
+## Self-fuzz pipeline (M4)
+
+`fuzzing/run_fuzz.py` is a maintainer-run job, not something end users ever
+run: it feeds a corpus of coding prompts (`fuzzing/corpus/prompts.json`) to
+an LLM (Anthropic), extracts the imports from each generated sample, checks
+them against PyPI/npm, and logs any nonexistent name into the
+known-hallucination database with `times_observed` and `observed_by_models`
+tracking. The pipeline logic (`run_fuzz`) is fully unit-tested with a fake
+generator and mocked registries — no network or API cost in `pytest`.
+
+Running it for real requires the `fuzz` extra and an API key:
+
+```
+uv pip install -e ".[fuzz]" -p .venv
+ANTHROPIC_API_KEY=sk-... .venv/Scripts/python.exe -m fuzzing.run_fuzz
+```
+
+This has **not been run yet** — no real fuzz campaign has executed, so the
+seed database still only contains the 3 manually-sourced incidents from M1.
+Running it for real costs real API money; do that deliberately, not as a
+side effect of installing the package.
+
+## MCP server (M5)
+
+`phantomguard-mcp` exposes a single tool, `check_dependency(name, ecosystem)`,
+returning the same ALLOW/WARN/BLOCK verdict as the CLI, for any MCP-compatible
+client (Cursor, Windsurf, etc.) to call during planning. Requires the `mcp`
+extra:
+
+```
+uv pip install -e ".[mcp]" -p .venv
+phantomguard-mcp
+```
+
+Add it to an MCP client's config by pointing at the `phantomguard-mcp`
+command (stdio transport). No demo GIF or MCP-directory submission yet —
+those are manual follow-ups once the package is published.
+
 ## Try it
 
 ```
@@ -121,13 +172,25 @@ in-memory SQLite database — no live network calls or filesystem state in CI.
 ## Scope
 
 Built so far: M0 (registry-checker CLI), M1 (risk scoring + seeded
-hallucination DB), and M2 (npm/JS support, pre-commit hook, GitHub Action).
+hallucination DB), M2 (npm/JS support, pre-commit hook, GitHub Action), M4
+(self-fuzz pipeline — built and tested, not yet run for real), and M5 (MCP
+server core — built and tested; packaging polish like a demo GIF and MCP
+directory submission still pending).
 
-Not yet built: necessity checker (M3), self-fuzz pipeline (M4), MCP server
-(M5). M3's LLM-based rationale layer will be **strictly opt-in** — it only
-runs if an `ANTHROPIC_API_KEY` is set, and its absence never changes the
-deterministic ALLOW/WARN/BLOCK verdict. The core tool (everything above) has
-no API-key requirement and never will, since it's meant to be installed by
-anyone as a plugin/hook/pre-commit check at zero cost. M6 (auth analyzer) is
-explicitly out of scope for now — see `CLAUDE.md` and
-`docs/phantomguard-mvp-proposal.md` for the full roadmap.
+**M3 (LLM-based necessity/rationale layer) was deliberately skipped**, not
+just deferred. The deterministic ALLOW/WARN/BLOCK from M0–M2 is the actual
+security mechanism; M3 was scoped as advisory-only text that never changes
+the verdict, so it added complexity and an API-key dependency without adding
+real detection. If a "why is this risky" explanation is wanted later for
+Claude Code users specifically, the better approach is a `SKILL.md` that lets
+the already-running Claude reason about a WARN inline — using the
+subscription the user already has, at zero extra cost — rather than a
+separate LLM call from the CLI.
+
+The core tool (M0/M1/M2) has no API-key requirement and never will, since
+it's meant to be installed by anyone as a plugin/hook/pre-commit check at
+zero cost. M4's fuzz pipeline and M5's MCP server both need optional extras
+(`anthropic`, `mcp`) that only the maintainer or an MCP-client user installs,
+never the average CLI/hook/pre-commit user. M6 (auth analyzer) is explicitly
+out of scope — see `CLAUDE.md` and `docs/phantomguard-mvp-proposal.md` for
+the full roadmap.

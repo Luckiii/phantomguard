@@ -1,0 +1,14 @@
+[
+  {"prompt": "Write a Python script that reads a CSV file and uploads its rows to an S3 bucket.", "language": "python"},
+  {"prompt": "Write a Flask endpoint that queries a Postgres database and returns JSON.", "language": "python"},
+  {"prompt": "Write a Python script that scrapes a webpage and extracts all links.", "language": "python"},
+  {"prompt": "Write a Python function that resizes an image and saves it as a thumbnail.", "language": "python"},
+  {"prompt": "Write a Python script that sends an email with an attachment using SMTP.", "language": "python"},
+  {"prompt": "Write a Python CLI tool that downloads a YouTube video's audio track.", "language": "python"},
+  {"prompt": "Write a Python script that trains a simple sentiment classifier on a text dataset.", "language": "python"},
+  {"prompt": "Write a Node.js Express endpoint that queries MongoDB and returns JSON.", "language": "javascript"},
+  {"prompt": "Write a React component that fetches data from an API and renders a table.", "language": "javascript"},
+  {"prompt": "Write a Node.js script that reads a CSV file and uploads it to S3.", "language": "javascript"},
+  {"prompt": "Write a Node.js script that resizes an uploaded image.", "language": "javascript"},
+  {"prompt": "Write a TypeScript function that validates a JWT and returns the decoded payload.", "language": "javascript"}
+]

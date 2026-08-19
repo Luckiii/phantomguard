@@ -18,9 +18,16 @@ dependencies = [
 dev = [
     "pytest>=8.0",
 ]
+fuzz = [
+    "anthropic>=0.40",
+]
+mcp = [
+    "mcp>=1.0",
+]
 
 [project.scripts]
 phantomguard = "phantomguard.cli:app"
+phantomguard-mcp = "phantomguard.integrations.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["phantomguard"]
