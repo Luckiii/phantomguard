@@ -49,7 +49,7 @@ Exit code is `1` if any import is `BLOCK`ed, otherwise `0`.
 
 ```yaml
 repos:
-  - repo: https://github.com/<yourname>/phantomguard
+  - repo: https://github.com/Luckiii/phantomguard
     rev: v0.1.0
     hooks:
       - id: phantomguard
@@ -58,7 +58,7 @@ repos:
 **GitHub Actions** — add a step using the composite action in this repo:
 
 ```yaml
-- uses: <yourname>/phantomguard@v0.1.0
+- uses: Luckiii/phantomguard@v0.1.0
   with:
     path: .
     explain: "false"
