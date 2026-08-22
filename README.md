@@ -76,7 +76,7 @@ Exit code is `1` if any import is `BLOCK`ed, otherwise `0`.
 ```yaml
 repos:
   - repo: https://github.com/Luckiii/phantomguard
-    rev: v0.1.0
+    rev: v0.1.1
     hooks:
       - id: phantomguard
 ```
@@ -84,7 +84,7 @@ repos:
 **GitHub Actions** — add a step using the composite action in this repo:
 
 ```yaml
-- uses: Luckiii/phantomguard@v0.1.0
+- uses: Luckiii/phantomguard@v0.1.1
   with:
     path: .
     explain: "false"
