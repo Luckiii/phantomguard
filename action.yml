@@ -1,6 +1,6 @@
-name: "PhantomGuard"
+name: "PhantomGuard CLI"
 description: "Catch AI-hallucinated (slopsquatted) package names before they get installed."
-author: "PhantomGuard"
+author: "Luckiii"
 branding:
   icon: "shield"
   color: "purple"
