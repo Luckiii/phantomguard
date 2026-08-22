@@ -14,20 +14,33 @@ layer) was deliberately skipped — see "Scope" below.
 ## Install
 
 ```
+pip install phantomguard-cli
+```
+
+That's it — no API key, no config. This installs the `phantomguard` command
+(the PyPI *distribution name* is `phantomguard-cli`, since plain
+`phantomguard` collided with PyPI's name-similarity check; the command you
+actually run is still `phantomguard`).
+
+<details>
+<summary>Contributing to PhantomGuard itself (dev install)</summary>
+
+```
 uv venv .venv
 uv pip install -e ".[dev]" -p .venv
 ```
 
 (or `pip install -e ".[dev]"` in any virtualenv)
 
-The core CLI/hook/pre-commit/GitHub-Action path only needs `typer`, `httpx`,
-and `pydantic` — no API key, ever. Two extras add optional, maintainer-only
-capability:
+Two extras add optional, maintainer-only capability, neither needed for
+normal use:
 
 - `.[fuzz]` — installs the `anthropic` SDK, needed only to run the self-fuzz
   pipeline (see below).
 - `.[mcp]` — installs the `mcp` SDK, needed only to run the MCP server (see
   below).
+
+</details>
 
 ## Usage
 
@@ -77,12 +90,8 @@ repos:
     explain: "false"
 ```
 
-Both wrap the same CLI (`pip install phantomguard-cli` under the hood — the
-PyPI *distribution name* is `phantomguard-cli` since plain `phantomguard`
-collided with PyPI's name-similarity check against an existing project; the
-installed command is still `phantomguard`), so behavior is identical to
-running `phantomguard scan` locally. Neither requires any API key — see
-"Scope" below.
+Both wrap the same CLI, so behavior is identical to running `phantomguard scan`
+locally. Neither requires any API key — see "Scope" below.
 
 ## Risk scoring (M1)
 
